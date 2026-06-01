@@ -1,10 +1,9 @@
 import 'package:river_cli/command/create/create_page.dart';
+import 'package:river_cli/command/create/init_options.dart';
 import 'package:river_cli/command/create/project_init.dart';
 import 'package:river_cli/utils/utils.dart';
 
 void main(List<String> arguments) {
-  print('Arguments received: $arguments');
-
   if (arguments.isEmpty) {
     Utils.printUsage();
     return;
@@ -20,14 +19,14 @@ void main(List<String> arguments) {
 
     if (pageArgument.isEmpty) {
       print(
-          'Error: Missing page command. Usage: riverpod_cli create page:<page_name> --path <path>');
+          'Error: Missing page command. Usage: river_cli create page:<page_name> --path <path>');
       return;
     }
 
     final pageName = pageArgument.split(':')[1];
     if (pageName.isEmpty) {
       print(
-          'Error: Page name is missing. Usage: riverpod_cli create page:<page_name> --path <path>');
+          'Error: Page name is missing. Usage: river_cli create page:<page_name> --path <path>');
       return;
     }
 
@@ -41,12 +40,10 @@ void main(List<String> arguments) {
     CreatePage createPage = CreatePage();
     createPage.createPageWithRoute(pageName, path, arguments);
   } else if (command == 'init') {
-    // Initialize the default project structure
-    Utils.ensureDependencies();
-    createInitialStructure();
-    print('Project initialized successfully!');
+    final options = InitOptions.parse(arguments.sublist(1));
+    runInit(options);
   } else {
-    print(
-        'Unknown command. Use "riverpod_cli create page:<page_name> --path <path>"');
+    print('Unknown command "$command".');
+    Utils.printUsage();
   }
 }

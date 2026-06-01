@@ -92,14 +92,11 @@ final GoRouter router = GoRouter(
       '$basePath/controllers/${pageName}_controller.dart': '''
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ${className}Controller extends StateNotifier<int> {
-  ${className}Controller() : super(0){
-  onInit();
-  }
-
-  void onInit() {
-    // Perform initialization logic here
-    print('Controller initialized');
+class ${className}Controller extends Notifier<int> {
+  @override
+  int build() {
+    // Initial state (and any setup) goes here.
+    return 0;
   }
 
   // Increment the counter
@@ -132,7 +129,7 @@ class ${className}View extends StatelessWidget {
                 final counter = ref.watch(${pageName}ControllerProvider);
                 return Text(
                   'Counter: \$counter',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
             ),
@@ -173,11 +170,9 @@ class ${className}View extends StatelessWidget {
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/${pageName}_controller.dart';
 
-/// StateNotifierProvider for $className
+/// Riverpod provider for $className
 final ${pageName}ControllerProvider =
-    StateNotifierProvider<${className}Controller, int>((ref) {
-  return ${className}Controller();
-});
+    NotifierProvider<${className}Controller, int>(${className}Controller.new);
 ''',
     };
 
