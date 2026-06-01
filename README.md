@@ -5,7 +5,7 @@ A command-line tool to automate the creation of a feature structure in a Flutter
 
 ## Features
 
-- **Generate Project Structure**: Initialize your project with a base structure for managing features using `river_cli init`.
+- **Scaffold a Modular Project Structure**: Initialize your project with `river_cli init` and opt into reusable modules (config, utils, extensions, widgets, networking, storage) — only the files and packages you pick are added.
 - **Generate Page Feature**: Easily create a new feature page with a controller, binding, and view using `river_cli create page:<page_name>`.
 - **Generate Folder Structure**: Automatically creates folders like `controllers`, `bindings`, and `views` for each new feature.
 - **Generate Files**: Creates the necessary Dart files with basic boilerplate code, including a controller, binding, and view.
@@ -30,40 +30,51 @@ Once everything is set up, you can use the following commands.
 
 ## Commands
 
-### 1. `Initialize Fully Structured Project`
+### 1. `Initialize a Modular Project Structure`
 
-This command initializes the project structure by creating the necessary folders and configurations.
+`init` scaffolds commonly-used `lib/` files, folders, and packages into your
+Flutter project. The reusable code is grouped into **modules** that you opt into
+— interactively or with flags. Only the selected modules' files and packages are
+added, and existing files are **skipped** (never overwritten) unless you pass
+`--force`. Packages are installed with `flutter pub add`, so versions are
+resolved to match your project's Dart/Flutter SDK.
 
 ```bash
-river_cli init
+river_cli init            # interactive: prompts Yes/No per module
+river_cli init --all      # everything
+river_cli init --minimal  # just the core (entry point, routing, home feature)
+river_cli init --modules config,utils,widgets
 ```
 
-This will generate the following structure:
+#### Available modules
 
-```
-├── lib
-│   ├── app
-│   │   ├── config                # Configuration files and constants
-│   │   ├── core                  # Core functionalities and base classes
-│   │   ├── extensions            # Extension methods for cleaner code
-│   │   ├── shared_widgets        # Reusable widgets across the app
-│   │   ├── utils                 # Utility functions and helpers
-│   │   ├── routes                # Application route definitions
-│   │
-│   ├── data
-│   │   ├── models                # Data models for the app
-│   │   ├── provider              # Data providers for API or local data
-│   │   │   ├── network           # Network-related services
-│   │   ├── repositories          # Repositories for data handling logic
-│   │
-│   ├── presentation
-│   │   ├── home                  # Home module
-│   │   │   ├── controllers       # State management for Home module
-│   │   │   ├── views             # UI for Home module
-│   │   │   ├── bindings          # Dependency bindings for Home module
-```
+| Module       | What it adds | Packages |
+|--------------|--------------|----------|
+| `core` *(always)* | `main.dart`, `go_router` routing, and a sample Riverpod home feature + the base `lib/` folder tree | `flutter_riverpod`, `riverpod`, `go_router` |
+| `config`     | `AppColors` (with a runtime-swappable primary), `AppTextStyles`, `AppConstants`, `AppStrings`, `Globals` + `.env` loading, dev/prod `AppEnvironment`, `LocalDataKey` enum | `sizer`, `google_fonts`, `flutter_dotenv` |
+| `utils`      | `Utils` (asset paths, date formatting, toasts, snackbars, URL launching), `Validators`, date helpers, keyboard helpers | `intl`, `fluttertoast`, `url_launcher` |
+| `extensions` | `num.height` / `.width`, `Color.withOpacityValue`, `DateTime.weekOfYear` | — |
+| `widgets`    | `MyText`, `CustomButton`, `MyContainer`, `InputTextField`, asset image/icon, refresh indicator, error banner, empty state, loading spinner | `google_fonts`, `sizer` |
+| `network`    | Dio `APIProvider` (get/post/put/patch/delete/multipart, bearer auth, typed errors), `APIRequestRepresentable`, `ApiEndPoints`, exceptions, `BaseRepository` + sample | `dio` |
+| `storage`    | `LocalDB` (typed SharedPreferences wrapper + Riverpod providers), `SecureStorageService` | `shared_preferences`, `flutter_secure_storage` |
 
-You can modify the generated structure as needed for your project.
+Modules that depend on others pull them in automatically (e.g. `widgets`
+requires `config`, `utils`, and `extensions`).
+
+#### Init options
+
+| Flag | Description |
+|------|-------------|
+| `-a`, `--all` | Include every optional module |
+| `--minimal` | Only the core module |
+| `-m`, `--modules <a,b,c>` | Include the listed modules (comma-separated) |
+| `-y`, `--yes` | Non-interactive; with no selection, includes all modules |
+| `-f`, `--force` | Overwrite files that already exist |
+| `--no-pub-get` | Do not run `flutter pub add` / `pub get` |
+| `-l`, `--list` | List available modules and exit |
+| `-h`, `--help` | Show init help |
+
+Run `river_cli init --list` to see the modules available in your installed version.
 
 ### 2. `Create Page`
 
